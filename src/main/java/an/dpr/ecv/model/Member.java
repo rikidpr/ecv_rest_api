@@ -3,6 +3,8 @@ package an.dpr.ecv.model;
 import java.time.LocalDate;
 import java.util.Date;
 
+import javax.persistence.Entity;
+
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -10,6 +12,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @Builder
 @EqualsAndHashCode
+@Entity
 public class Member {
 
 	private String id;
