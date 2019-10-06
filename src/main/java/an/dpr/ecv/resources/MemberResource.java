@@ -5,6 +5,7 @@ import java.util.List;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -15,31 +16,27 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
-import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import an.dpr.ecv.model.Member;
 import an.dpr.ecv.services.MemberService;
 
-@Path("member")
+@Path("/member")
 @RequestScoped
 public class MemberResource {
 
+	private static final Logger log = LoggerFactory.getLogger(MemberResource.class);
 	@Inject
 	private MemberService service;
-	
-	private Logger log = LogManager.getLogger(MemberResource.class);
 
 	@GET
-	@Path("{id}")
+	@Path("/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
-	@Operation(summary = "Get user by id", description = "Member getter, you can get users by the id ")
-	@APIResponse(responseCode = "400", description = "User not found")
-	public Response getMember(
-			@Parameter(description = "Member's id to search", required = true) @PathParam("id") String id) {
+	public Response getMember(@PathParam("id") Integer id) {
+		log.info("Parameters:" + id);
 		Member member = service.getMember(id);
 		if (member == null)
 			return Response.status(Status.NOT_FOUND).build();
@@ -48,34 +45,57 @@ public class MemberResource {
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Member> findMembers(@Parameter(description = "find by name") @PathParam("name") String name,
-			@Parameter(description = "find by entry date") @PathParam("entryDate") String entryDate) {
+	@Operation(operationId = "findMembers", summary = "find members")
+	public List<Member> findMembers(
+			@Parameter(name = "name", description = "find by name") @PathParam("name") String name,
+			@Parameter(name = "entryDate", description = "find by entry date") @PathParam("entryDate") String entryDate) {
+		log.info("parameters: " + name + "," + entryDate);
 		return service.findMembers();
 	}
 
-	@POST	
-	@Operation(summary = "create new member")
+	@POST
+	@Operation(operationId = "newMember", summary = "create new member")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response newMember(@Parameter(description = "Member info in json", required = true) Member member) {
+	public Response newMember(
+			@Parameter(name = "member", description = "Member info in json", required = true) Member member) {
+		log.info("-Parameters: " + member);
 		try {
+			member.setId(null);// is a new member, id should be null
 			service.saveMember(member);
-			return Response.status(Status.METHOD_NOT_ALLOWED).entity("still not implemented").build();
-		} catch (Exception e) { 
-			log.error(e.getCause());
-			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();			
+			return Response.ok().build();
+		} catch (Exception e) {
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
 		}
 	}
 
 	@PUT
-	@Operation(summary = "update member")
+	@Operation(operationId = "updateMember", summary = "update member")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response updateMember(@Parameter(description = "id to delete", required = true) String id) {
+	public Response updateMember(
+			@Parameter(name = "member", description = "Member info in json", required = true) Member member) {
+		log.info("Parameters: " + member);
+		try {
+			if (service.existsMember(member.getId())) {
+				service.saveMember(member);
+				return Response.ok().build();
+			} else {
+				return Response.status(Status.NOT_FOUND).entity("Member doesn't exists, you should use POST method")
+						.build();
+			}
+		} catch (Exception e) {
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
+		}
+	}
+
+	@DELETE
+	@Operation(operationId = "updateMember", summary = "update member")
+	public Response deleteMember(@Parameter(name = "id", description = "id to delete", required = true) Integer id) {
+		log.info("parameters: " + id);
 		try {
 			Boolean delete = service.deleteMember(id);
 			return Response.status(Status.OK).entity(delete).build();
-		} catch (Exception e) { 
-			log.error(e.getCause());
-			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();			
+		} catch (Exception e) {
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
 		}
 	}
 }

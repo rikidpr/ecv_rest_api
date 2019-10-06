@@ -4,29 +4,65 @@ import java.time.LocalDate;
 import java.util.List;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Root;
+import javax.transaction.Transactional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import an.dpr.ecv.model.Category;
 import an.dpr.ecv.model.Member;
+import an.dpr.ecv.resources.MemberResource;
 
 @ApplicationScoped
 public class MemberService {
+	
+	private static final Logger log = LoggerFactory.getLogger(MemberService.class);
+	@Inject
+    EntityManager entityManager; 
 
-	public Member getMember(String id) {
-		return Member.builder().id(id).name("fulano").category(Category.ALEVIN)
-				.info("member extra info, how telefphone, fahters name...")
-				.entryDate(LocalDate.of(1980, 6, 7)).build();
+	@Transactional
+	public Member getMember(Integer id) {
+		try{
+			return entityManager.find(Member.class, id);
+		} catch(Exception e) {
+			log.error(e.getMessage(), e.getCause());
+			return null;
+		}
 	}
 	
+	public boolean existsMember(Integer id) {
+		return getMember(id) != null;
+	}
+	
+	@Transactional
 	public void saveMember(Member member) {
-		return;
-//		throw nXew UnsupportedOperationException("not implemented yet");
+		entityManager.persist(member);
 	}
 	
-	public boolean deleteMember(String id) {
+	@Transactional
+	public boolean deleteMember(Integer id) {
 		throw new UnsupportedOperationException("not implemented yet");
 	}
 	
+	@Transactional
 	public List<Member> findMembers() {
-		return List.of(getMember("1"), getMember("2"));
+		try{
+			CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+			CriteriaQuery<Member> criteriaQuery = cb.createQuery(Member.class);
+			Root<Member> m = criteriaQuery.from(Member.class);
+			criteriaQuery.select(m);
+			TypedQuery<Member> query = entityManager.createQuery(criteriaQuery);
+			return query.getResultList();
+		} catch(Exception e) {
+			log.error(e.getMessage(), e.getCause());
+			return null;
+		}
 	}
 }
