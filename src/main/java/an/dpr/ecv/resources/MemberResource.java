@@ -30,13 +30,13 @@ public class MemberResource {
 
 	@Inject
 	private MemberService service;
-	
+
 	private Logger log = LogManager.getLogger(MemberResource.class);
 
 	@GET
 	@Path("{id}")
 	@Produces(MediaType.APPLICATION_JSON)
-	@Operation(summary = "Get user by id", description = "Member getter, you can get users by the id ")
+	@Operation(operationId="getMember", summary = "Get user by id", description = "Member getter, you can get users by the id ")
 	@APIResponse(responseCode = "400", description = "User not found")
 	public Response getMember(
 			@Parameter(description = "Member's id to search", required = true) @PathParam("id") String id) {
@@ -48,34 +48,38 @@ public class MemberResource {
 
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
-	public List<Member> findMembers(@Parameter(description = "find by name") @PathParam("name") String name,
-			@Parameter(description = "find by entry date") @PathParam("entryDate") String entryDate) {
+	@Operation(operationId="findMembers", summary="find members")
+	public List<Member> findMembers(
+			@Parameter(name = "name", description = "find by name") @PathParam("name") String name,
+			@Parameter(name = "entryDate", description = "find by entry date") @PathParam("entryDate") String entryDate) {
+		log.info("find members");
 		return service.findMembers();
 	}
 
-	@POST	
-	@Operation(summary = "create new member")
+	@POST
+	@Operation(operationId="newMember", summary = "create new member")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response newMember(@Parameter(description = "Member info in json", required = true) Member member) {
+	public Response newMember(
+			@Parameter(name = "member", description = "Member info in json", required = true) Member member) {
 		try {
 			service.saveMember(member);
 			return Response.status(Status.METHOD_NOT_ALLOWED).entity("still not implemented").build();
-		} catch (Exception e) { 
+		} catch (Exception e) {
 			log.error(e.getCause());
-			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();			
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
 		}
 	}
 
 	@PUT
-	@Operation(summary = "update member")
+	@Operation(operationId="updateMember", summary = "update member")
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response updateMember(@Parameter(description = "id to delete", required = true) String id) {
+	public Response updateMember(@Parameter(name = "id", description = "id to delete", required = true) String id) {
 		try {
 			Boolean delete = service.deleteMember(id);
 			return Response.status(Status.OK).entity(delete).build();
-		} catch (Exception e) { 
+		} catch (Exception e) {
 			log.error(e.getCause());
-			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();			
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
 		}
 	}
 }
