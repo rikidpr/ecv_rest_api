@@ -3,9 +3,9 @@ package an.dpr.ecv.services;
 import java.time.LocalDate;
 import java.util.List;
 
-import javax.annotation.Resource;
 import javax.enterprise.context.ApplicationScoped;
 import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -17,7 +17,7 @@ import an.dpr.ecv.model.Member;
 @ApplicationScoped
 public class MemberService {
 	
-	@Resource
+	@PersistenceContext(name = "ecv-jpa-unit")
 	private EntityManager entityManager;
 
 	public Member getMember(String id) {

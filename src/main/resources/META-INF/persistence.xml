@@ -5,9 +5,9 @@
 	<persistence-unit name="example"
 		transaction-type="JTA">
 		<provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
-		<jta-data-source>localJTA</jta-data-source>
+		<jta-data-source>ecv-jpa-unit</jta-data-source>
 		<!-- optional -->
-		<class>org.eclipse.persistence.example.business.Cell</class>
+		<class>an.dpr.ecv.model.Member</class>
 		<properties>
 			<!-- optional -->
 			<property name="eclipselink.target-database"
