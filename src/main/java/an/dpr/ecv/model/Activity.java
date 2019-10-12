@@ -1,22 +1,31 @@
 package an.dpr.ecv.model;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
-import lombok.Builder;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+
+import io.quarkus.hibernate.orm.panache.PanacheEntity;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
+@Entity
 @Data
-@Builder
-@EqualsAndHashCode
-public class Activity {
+public class Activity extends PanacheEntity{
 
-	private Integer id;
-	private Date date;
-	private String location;
-	private String organizer;
-	private List<Participant> participants;
-	private List<SubActivity> subevents;
-	private ActivityType type;
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	public Long id;
+	public LocalDate date;
+	public String location;
+	public String organizer;
+//	public List<Participant> participants;
+//	public List<SubActivity> subevents;
+	public ActivityType type;
+	
+	public static List<Activity> findByLocation(String location) {
+		return list("location", location);
+	}
 }

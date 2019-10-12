@@ -1,6 +1,5 @@
 package an.dpr.ecv.services;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -9,16 +8,13 @@ import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Root;
 import javax.transaction.Transactional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import an.dpr.ecv.model.Category;
 import an.dpr.ecv.model.Member;
-import an.dpr.ecv.resources.MemberResource;
 
 @ApplicationScoped
 public class MemberService {
