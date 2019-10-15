@@ -1,5 +1,6 @@
-package an.dpr.ecv.model;
+package an.dpr.ecv.entities;
 
+import an.dpr.ecv.model.SubActivityType;
 import lombok.Builder;
 import lombok.Data;
 

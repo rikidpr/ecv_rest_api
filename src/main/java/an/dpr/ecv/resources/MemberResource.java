@@ -1,7 +1,9 @@
 package an.dpr.ecv.resources;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -16,12 +18,16 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import com.github.dozermapper.core.DozerBeanMapperBuilder;
+import com.github.dozermapper.core.Mapper;
+
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import an.dpr.ecv.model.Member;
+import an.dpr.ecv.entities.Member;
+import an.dpr.ecv.resources.dto.MemberDTO;
 import an.dpr.ecv.services.MemberService;
 
 @Path("/member")
@@ -29,15 +35,24 @@ import an.dpr.ecv.services.MemberService;
 public class MemberResource {
 
 	private static final Logger log = LoggerFactory.getLogger(MemberResource.class);
-	@Inject
-	private MemberService service;
+    
+    @Inject
+    MemberService service;
+    
+    private Mapper mapper;
+
+    @PostConstruct
+    void init() {
+		//FIXME [riki] extract to a MemberMapper
+        mapper = DozerBeanMapperBuilder.buildDefault();
+    }
 
 	@GET
 	@Path("/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getMember(@PathParam("id") Integer id) {
 		log.info("Parameters:" + id);
-		Member member = service.getMember(id);
+		MemberDTO member = mapper.map(service.getMember(id), MemberDTO.class);
 		if (member == null)
 			return Response.status(Status.NOT_FOUND).build();
 		return Response.ok(member).build();
@@ -46,11 +61,13 @@ public class MemberResource {
 	@GET
 	@Produces(MediaType.APPLICATION_JSON)
 	@Operation(operationId = "findMembers", summary = "find members")
-	public List<Member> findMembers(
+	public List<MemberDTO> findMembers(
 			@Parameter(name = "name", description = "find by name") @PathParam("name") String name,
 			@Parameter(name = "entryDate", description = "find by entry date") @PathParam("entryDate") String entryDate) {
-		log.info("parameters: " + name + "," + entryDate);
-		return service.findMembers();
+        log.info("parameters: " + name + "," + entryDate);
+        List<MemberDTO> members = new ArrayList<MemberDTO>();
+        mapper.map(service.findMembers(), members);
+		return members;
 	}
 
 	@POST
