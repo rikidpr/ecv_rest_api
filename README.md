@@ -1,6 +1,15 @@
-# MicroProfile generated Application
+# ECV Rest API
 
-## Introduction
+Example rest api for ECV. 
+MicroProfile Application
+
+## What you can find here
+- A simple rest api to organize members, events, rankings for a cycling team
+- Usage of recomended Microprofile/Quarkus practicies
+- Quarkus Panache
+- incoming: tests, microprofile technologies (openapi, tracing, health, fault tolerance, metrics), ...
+
+## Created with microprofile starter
 
 MicroProfile Starter has generated this MicroProfile application for you.
 
