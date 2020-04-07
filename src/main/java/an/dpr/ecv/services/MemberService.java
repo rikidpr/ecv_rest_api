@@ -1,8 +1,6 @@
 package an.dpr.ecv.services;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -17,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import an.dpr.ecv.entities.Member;
-import an.dpr.ecv.resources.dto.MemberDTO;
 
 @ApplicationScoped
 public class MemberService {
