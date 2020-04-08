@@ -1,4 +1,4 @@
-package an.dpr;
+package an.dpr.ecv.resources;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.containsString;
