@@ -24,39 +24,52 @@ public class MemberService {
     EntityManager entityManager; 
 
 	@Transactional
-	public Member getMember(Integer id) {
+	public Member getMember(final Integer id) {
 		try{
 			return entityManager.find(Member.class, id);
-		} catch(Exception e) {
+		} catch(final Exception e) {
 			log.error(e.getMessage(), e.getCause());
 			return null;
 		}
 	}
 	
-	public boolean existsMember(Integer id) {
+	public boolean existsMember(final Integer id) {
 		return getMember(id) != null;
 	}
 	
 	@Transactional
-	public void saveMember(Member member) {
+	public void saveMember(final Member param) {
+		final Member member;
+		if (param.getId() != null) {
+			member = getMember(param.getId());
+			member.setCategory(param.getCategory());
+			member.setCode(param.getCode());
+			member.setEntryDate(param.getEntryDate());
+			member.setInfo(param.getInfo());
+			member.setLeavingDate(param.getLeavingDate());
+			member.setName(param.getName());
+			// member.setParticipants(participants);
+		} else { 
+			member = param;
+		}
 		entityManager.persist(member);
 	}
 	
 	@Transactional
-	public boolean deleteMember(Integer id) {
+	public boolean deleteMember(final Integer id) {
 		throw new UnsupportedOperationException("not implemented yet");
 	}
 	
 	@Transactional
 	public List<Member> findMembers() {
 		try{
-			CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-			CriteriaQuery<Member> criteriaQuery = cb.createQuery(Member.class);
-			Root<Member> m = criteriaQuery.from(Member.class);
+			final CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+			final CriteriaQuery<Member> criteriaQuery = cb.createQuery(Member.class);
+			final Root<Member> m = criteriaQuery.from(Member.class);
 			criteriaQuery.select(m);
-			TypedQuery<Member> query = entityManager.createQuery(criteriaQuery);
+			final TypedQuery<Member> query = entityManager.createQuery(criteriaQuery);
 			return query.getResultList();
-		} catch(Exception e) {
+		} catch(final Exception e) {
 			log.error(e.getMessage(), e.getCause());
 			return null;
 		}

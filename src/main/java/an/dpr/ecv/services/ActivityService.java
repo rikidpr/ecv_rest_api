@@ -15,17 +15,6 @@ import an.dpr.ecv.resources.dto.ActivityDTO;
 @RequestScoped
 public class ActivityService {
 
-	private void persist(Activity activity) {
-		if (activity.id != null) {
-			Activity actToPersist = Activity.findById(activity.id);
-			if (actToPersist != null) {
-				actToPersist.persist();
-			}
-		} else {
-			activity.persist();
-		}
-	}
-
 	public List<ActivityDTO> listAll() {
 		return buildActivityDTOList(Activity.listAll());
 	}
@@ -66,7 +55,19 @@ public class ActivityService {
 
 	@Transactional
 	public void save(Activity activity) {
-		persist(activity);
+		if (activity.id != null) {
+			Optional<Activity> optActivity = findById(activity.id);
+			if (optActivity.isPresent())  {
+				Activity putActivity = optActivity.get();
+				putActivity.date = activity.date;
+				putActivity.location = activity.location;
+				putActivity.organizer = activity.organizer;
+				putActivity.type = activity.type;
+				putActivity.persist();
+			}
+		} else {
+			activity.persist();
+		}
 	}
 
 	@Transactional

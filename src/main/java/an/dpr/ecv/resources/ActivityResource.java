@@ -54,9 +54,8 @@ public class ActivityResource {
 	@Operation(operationId = "updateActivity")
 	public Response updateActivity(ActivityDTO activityParam) {
 		log.debug("parameters:" + activityParam);
-		Optional<Activity> activity = service.findById(activityParam.getId());
-		if (activity.isPresent())  { 
-			service.save(activity.get());
+		if (activityParam.getId() != null)  {
+			service.save(service.convertToActivity(activityParam));
 			return Response.ok().build();
 		 } else 
 			return Response.status(Status.NOT_FOUND).build();

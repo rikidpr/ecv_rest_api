@@ -23,8 +23,10 @@ import io.restassured.http.ContentType;
 @TestMethodOrder(OrderAnnotation.class)
 public class ActivityResourceTest {
 
+    private static final long ACTIVITY_ID = 2l;
+
     @Test
-    @Order(1)
+    @Order(10)
     public void postActivityTest() {
         given()
         .contentType(ContentType.JSON)
@@ -32,6 +34,17 @@ public class ActivityResourceTest {
         .post("/activity")
         .then().assertThat()
         .statusCode(200);
+    }
+
+    @Test
+    @Order(15)
+    public void postActivityTestShould409() {
+        given()
+        .contentType(ContentType.JSON)
+        .body(getPayload("ecv", ACTIVITY_ID))
+        .post("/activity")
+        .then().assertThat()
+        .statusCode(409);
     }
 
     private String getPayload(String organizer, Long id) {
@@ -46,12 +59,33 @@ public class ActivityResourceTest {
     }
 
     @Test
-    @Order(2)
+    @Order(20)
     public void getActivityTest() {
         given()
         .contentType(ContentType.JSON)
         .get("/activity")
         .then().assertThat()
-        .statusCode(200).body(containsString(getPayload("ecv",1l)));
+        .statusCode(200).body(containsString(getPayload("ecv",ACTIVITY_ID)));
+    }
+    
+    @Test
+    @Order(30)
+    public void putActivityTest() {
+        given()
+        .contentType(ContentType.JSON)
+        .body(getPayload("bomberos", ACTIVITY_ID))
+        .put("/activity")
+        .then().assertThat()
+        .statusCode(200);
+    }
+
+    @Test
+    @Order(40)
+    public void getActivityTestPut() {
+        given()
+        .contentType(ContentType.JSON)
+        .get("/activity")
+        .then().assertThat()
+        .statusCode(200).body(containsString(getPayload("bomberos",ACTIVITY_ID)));
     }
 }
