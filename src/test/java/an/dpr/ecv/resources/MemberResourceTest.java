@@ -1,13 +1,21 @@
 package an.dpr.ecv.resources;
 
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.CoreMatchers.containsString;
+import static org.hamcrest.CoreMatchers.hasItem;
+
+import java.time.LocalDate;
+
+import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbBuilder;
 
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 
+import an.dpr.ecv.model.Category;
+import an.dpr.ecv.resources.dto.MemberDTO;
+import an.dpr.ecv.resources.dto.MemberDTO.MemberDTOBuilder;
 import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.http.ContentType;
 
@@ -16,44 +24,73 @@ import io.restassured.http.ContentType;
 public class MemberResourceTest {
     
     @Test
-    @Order(1)
+    @Order(10)
     public void testPostMemberEndpoint() {
-        String payload = "{\"cod\": \"code\", \"name\":\"fulanita\"," +
-        " \"category\":\"PROMESA_FEM\", \"info\":\"fulanita de tal\"}";
 		given()
         .contentType(ContentType.JSON)
-        .body(payload)
+        .body(getPayload(null, Category.PROMESA_FEM))
         .post("/member")
         .then()
-        .assertThat()
         .statusCode(200);
     }
-    
+
     @Test
-    @Order(2)
-    public void testGetMemberEndpoint() {
-        given().when().get("/member").then().statusCode(200)
-        .body(containsString("PROMESA_FEM"));
+    @Order(15)
+    public void testPostMemberEndpointShould409() {
+		given()
+        .contentType(ContentType.JSON)
+        .body(getPayload(1, Category.PROMESA_FEM))
+        .post("/member")
+        .then()
+        .statusCode(409);
+    }
+
+    private String getPayload(Integer id, Category category) {
+        MemberDTOBuilder builder = MemberDTO.builder().category(category)
+        .code("code").entryDate(LocalDate.now()).info("info")
+        .name("name");
+        if (id != null) {
+            builder = builder.id(id);
+        }
+        Jsonb jsonb = JsonbBuilder.create();
+        return jsonb.toJson(builder.build());
     }
     
     @Test
-    @Order(3)
+    @Order(20)
+    public void testGetMemberEndpoint() {
+        given().when().get("/member").then().statusCode(200)
+        .body("category", hasItem(Category.PROMESA_FEM.toString()));
+    }
+    
+    @Test
+    @Order(30)
     public void testPutMemberEndpoint() {
-        String payload = "{\"id\":\"1\", \"cod\": \"code\", \"name\":\"fulanita\"," +
-        " \"category\":\"PRINCIPIANTE_FEM\", \"info\":\"fulanita de tal\"}";
 		given()
         .contentType(ContentType.JSON)
-        .body(payload)
+        .body(getPayload(1, Category.PRINCIPIANTE_FEM))
         .put("/member")
         .then()
         .assertThat()
         .statusCode(200);
     }
+
+    @Test
+    @Order(35)
+    public void testPutMemberEndpointShould404() {
+		given()
+        .contentType(ContentType.JSON)
+        .body(getPayload(null, Category.PRINCIPIANTE_FEM))
+        .put("/member")
+        .then()
+        .assertThat()
+        .statusCode(404);
+    }
     
     @Test
-    @Order(4)
+    @Order(40)
     public void testGetMemberEndpointAfterPut() {
         given().when().get("/member").then().statusCode(200)
-        .body(containsString("PRINCIPIANTE_FEM"));
+        .body("category", hasItem(Category.PRINCIPIANTE_FEM.toString()));
     }
 }

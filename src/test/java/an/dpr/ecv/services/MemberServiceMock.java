@@ -11,9 +11,4 @@ import io.quarkus.test.Mock;
 @ApplicationScoped 
 public class MemberServiceMock extends MemberService{
 
-    @Override
-    public boolean existsMember(Integer id) {
-        return true;
-    }
-    
 }

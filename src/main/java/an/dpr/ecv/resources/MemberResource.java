@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
 import javax.ws.rs.Consumes;
@@ -28,6 +30,7 @@ import org.slf4j.LoggerFactory;
 
 import an.dpr.ecv.entities.Member;
 import an.dpr.ecv.resources.dto.MemberDTO;
+import an.dpr.ecv.resources.dto.MemberMapper;
 import an.dpr.ecv.services.MemberService;
 
 @Path("/member")
@@ -37,25 +40,21 @@ public class MemberResource {
 	private static final Logger log = LoggerFactory.getLogger(MemberResource.class);
     
     @Inject
-    MemberService service;
+	MemberService service;
+	
+	@Inject
+	MemberMapper mapper;
     
-    private Mapper mapper;
-
-    @PostConstruct
-    void init() {
-		//FIXME [riki] extract to a MemberMapper
-        mapper = DozerBeanMapperBuilder.buildDefault();
-    }
-
 	@GET
 	@Path("/{id}")
+	// @PermitAll
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getMember(@PathParam("id") Integer id) {
 		log.info("Parameters:" + id);
-		MemberDTO member = mapper.map(service.getMember(id), MemberDTO.class);
-		if (member == null)
+		MemberDTO memberDto = mapper.map(service.getMember(id));
+		if (memberDto == null)
 			return Response.status(Status.NOT_FOUND).build();
-		return Response.ok(member).build();
+		return Response.ok(memberDto).build();
 	}
 
 	@GET
@@ -65,20 +64,22 @@ public class MemberResource {
 			@Parameter(name = "name", description = "find by name") @PathParam("name") String name,
 			@Parameter(name = "entryDate", description = "find by entry date") @PathParam("entryDate") String entryDate) {
         log.info("parameters: " + name + "," + entryDate);
-        List<MemberDTO> members = new ArrayList<MemberDTO>();
-        mapper.map(service.findMembers(), members);
-		return members;
+        return mapper.map(service.findMembers());
 	}
 
 	@POST
+	// @RolesAllowed("JUNTERO")
 	@Operation(operationId = "newMember", summary = "create new member")
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response newMember(
-			@Parameter(name = "member", description = "Member info in json", required = true) Member member) {
-		log.info("-Parameters: " + member);
+			@Parameter(name = "member", description = "Member info in json", required = true) MemberDTO dto) {
+		log.info("-Parameters: " + dto);
+		if (dto.getId() != null) {
+			return Response.status(Status.CONFLICT).build();
+		}
 		try {
-			member.setId(null);// is a new member, id should be null
-			service.saveMember(member);
+			dto.setId(null);// is a new member, id should be null
+			service.saveMember(mapper.map(dto));
 			return Response.ok().build();
 		} catch (Exception e) {
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.getMessage()).build();
