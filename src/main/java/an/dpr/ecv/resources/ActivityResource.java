@@ -18,6 +18,12 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.eclipse.microprofile.metrics.Counter;
+import org.eclipse.microprofile.metrics.MetricUnits;
+import org.eclipse.microprofile.metrics.annotation.Counted;
+import org.eclipse.microprofile.metrics.annotation.Gauge;
+import org.eclipse.microprofile.metrics.annotation.Metric;
+import org.eclipse.microprofile.metrics.annotation.Timed;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.slf4j.Logger;
@@ -31,10 +37,27 @@ import an.dpr.ecv.services.ActivityService;
 @RequestScoped
 public class ActivityResource {
 
+	private static final Logger log = LoggerFactory.getLogger(MemberResource.class);
 	@Inject
 	ActivityService service;
-	private static final Logger log = LoggerFactory.getLogger(MemberResource.class);
 
+	@Metric
+	Counter counterExample;
+
+	@GET
+	// @Produces(MediaType.APPLICATION_JSON)
+	@Counted(name = "activity/next", description = "How many times called")
+	@Path("/next")
+	@Timed(name = "next activity",
+		description = "next activity timed",
+		unit = MetricUnits.MICROSECONDS,
+		absolute = true)
+	@Operation(operationId = "activity/next", description = "next activity in calendar")
+	public Response nextActivity() {
+		counterExample.inc();
+		return Response.ok().entity("Next Activity: TODO/not yet implemented").build();
+	}
+	
 	@POST
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Operation(operationId = "newActivity")
